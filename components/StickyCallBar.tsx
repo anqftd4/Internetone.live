@@ -11,13 +11,22 @@ export default function StickyCallBar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsVisible(window.scrollY > 300);
+      // Show after scrolling 300px
+      if (window.scrollY > 300 && !isDismissed) {
+        setIsVisible(true);
+      } else if (window.scrollY <= 300) {
+        setIsVisible(false);
+      }
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
-  if (isDismissed) return null;
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isDismissed]);
+
+  const handleDismiss = () => {
+    setIsDismissed(true);
+    setIsVisible(false);
+  };
 
   return (
     <AnimatePresence>
@@ -27,44 +36,53 @@ export default function StickyCallBar() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed top-20 left-0 right-0 z-40 hidden md:block"
+          className="fixed top-0 left-0 right-0 z-40 hidden md:block"
         >
-          <div className="container">
-            <div className="glass-strong rounded-2xl shadow-xl p-4 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center animate-pulse-glow">
-                  <Phone className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <p className="font-bold text-slate-900 dark:text-white">
-                    Speak to a Specialist Now
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                    <Clock className="w-4 h-4" />
-                    <span>{siteConfig.contact.hours}</span>
+          <div className="bg-gradient-to-r from-brand-600 via-brand-500 to-purple-600 shadow-lg">
+            <div className="container">
+              <div className="flex items-center justify-between py-3">
+                {/* Left - Message */}
+                <div className="flex items-center gap-4 text-white">
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="flex items-center justify-center w-10 h-10 rounded-full bg-white/20"
+                  >
+                    <Phone className="w-5 h-5" />
+                  </motion.div>
+                  <div>
+                    <p className="font-semibold">Speak to a Specialist</p>
+                    <p className="text-sm text-white/80 flex items-center gap-2">
+                      <Clock className="w-3 h-3" />
+                      {siteConfig.contact.hours}
+                    </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-3">
+                {/* Center - Phone CTA */}
                 <motion.a
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   href={`tel:${siteConfig.contact.phoneRaw}`}
-                  className="btn-call"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-brand-600 font-bold shadow-lg hover:shadow-xl transition-shadow"
                 >
                   <Phone className="w-5 h-5" />
-                  <span>Call {siteConfig.contact.phone}</span>
+                  <span>Call Now: {siteConfig.contact.phone}</span>
                 </motion.a>
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setIsDismissed(true)}
-                  className="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                  aria-label="Dismiss call bar"
-                >
-                  <X className="w-5 h-5" />
-                </motion.button>
+
+                {/* Right - Compliance + Close */}
+                <div className="flex items-center gap-4">
+                  <p className="text-xs text-white/70 max-w-[200px]">
+                    Independent comparison service
+                  </p>
+                  <button
+                    onClick={handleDismiss}
+                    className="p-1.5 rounded-full hover:bg-white/20 text-white/80 hover:text-white transition-colors"
+                    aria-label="Dismiss call bar"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

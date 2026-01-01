@@ -1,31 +1,48 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, Mail, Clock, X, MessageCircle } from 'lucide-react';
-import { siteConfig, Provider } from '@/lib/siteConfig';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { Phone, MessageCircle } from 'lucide-react';
+import { Provider } from '@/lib/siteConfig';
 
 interface ProviderPopupProps {
   provider: Provider;
 }
 
+// Provider theme configuration
+const getProviderTheme = (providerId: string) => {
+  const themes: Record<string, { color: string; colorDark: string; name: string }> = {
+    verizon: { color: '#E50914', colorDark: '#B5070F', name: 'verizon' },
+    spectrum: { color: '#0B3B8F', colorDark: '#082A66', name: 'spectrum' },
+    att: { color: '#00A8E8', colorDark: '#0088BE', name: 'at&t' },
+    optimum: { color: '#FF6A00', colorDark: '#CC5500', name: 'optimum' },
+  };
+  return themes[providerId] || themes.verizon;
+};
+
 export default function ProviderPopup({ provider }: ProviderPopupProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showMinimized, setShowMinimized] = useState(false);
   const [dismissCount, setDismissCount] = useState(0);
-  const [dontShowSession, setDontShowSession] = useState(false);
+  const [isReappearing, setIsReappearing] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 
+  const theme = getProviderTheme(provider.id);
+
+  // Check for reduced motion preference
+  useEffect(() => {
+    setPrefersReducedMotion(
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+  }, []);
+
   // Check sessionStorage on mount
   useEffect(() => {
-    const dontShow = sessionStorage.getItem(`popup-dontshow-${provider.id}`);
     const dismissed = sessionStorage.getItem(`popup-dismissed-${provider.id}`);
     
-    if (dontShow === 'true') {
-      setDontShowSession(true);
-      setShowMinimized(true);
-    } else if (dismissed) {
+    if (dismissed) {
       const count = parseInt(dismissed, 10) || 0;
       setDismissCount(count);
       if (count >= 2) {
@@ -34,21 +51,10 @@ export default function ProviderPopup({ provider }: ProviderPopupProps) {
         setIsOpen(true);
       }
     } else {
-      // First visit - show modal after short delay
       const timer = setTimeout(() => setIsOpen(true), 500);
       return () => clearTimeout(timer);
     }
   }, [provider.id]);
-
-  // Reappear logic after first dismissal
-  useEffect(() => {
-    if (!isOpen && !dontShowSession && dismissCount === 1) {
-      const timer = setTimeout(() => {
-        setIsOpen(true);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen, dontShowSession, dismissCount]);
 
   const handleClose = useCallback(() => {
     const newCount = dismissCount + 1;
@@ -61,11 +67,22 @@ export default function ProviderPopup({ provider }: ProviderPopupProps) {
     }
   }, [dismissCount, provider.id]);
 
-  // Focus trapping
+  // Reappear logic after first dismissal
+  useEffect(() => {
+    if (!isOpen && dismissCount === 1) {
+      const timer = setTimeout(() => {
+        setIsReappearing(true);
+        setIsOpen(true);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, dismissCount]);
+
+  // Focus trapping and ESC key
   useEffect(() => {
     if (isOpen) {
       previousActiveElement.current = document.activeElement as HTMLElement;
-      modalRef.current?.focus();
+      setTimeout(() => modalRef.current?.focus(), 100);
       
       const handleEscape = (e: KeyboardEvent) => {
         if (e.key === 'Escape') {
@@ -84,70 +101,156 @@ export default function ProviderPopup({ provider }: ProviderPopupProps) {
     }
   }, [isOpen, handleClose]);
 
-  const handleDontShowAgain = useCallback(() => {
-    setDontShowSession(true);
-    sessionStorage.setItem(`popup-dontshow-${provider.id}`, 'true');
-    setIsOpen(false);
-    setShowMinimized(true);
-  }, [provider.id]);
-
   const handleMinimizedClick = useCallback(() => {
-    if (!dontShowSession) {
-      setIsOpen(true);
-      setShowMinimized(false);
-    }
-  }, [dontShowSession]);
+    setIsReappearing(true);
+    setIsOpen(true);
+    setShowMinimized(false);
+  }, []);
 
-  // Check for reduced motion preference
-  const prefersReducedMotion = typeof window !== 'undefined' 
-    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  const overlayVariants = {
+  // Animation variants
+  const backdropVariants: Variants = prefersReducedMotion ? {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
+  } : {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { duration: 0.4, ease: 'easeOut' }
+    },
   };
 
-  const popupVariants = prefersReducedMotion ? {
+  const modalVariants: Variants = prefersReducedMotion ? {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
     exit: { opacity: 0 },
-  } : {
-    hidden: { 
-      opacity: 0, 
-      scale: 0.85,
-      y: 40,
-    },
+  } : isReappearing ? {
+    hidden: { opacity: 0, y: 100, scale: 0.95 },
     visible: { 
       opacity: 1, 
+      y: 0, 
       scale: 1,
+      transition: {
+        type: 'spring',
+        stiffness: 280,
+        damping: 28,
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: 50,
+      scale: 0.95,
+      transition: { duration: 0.2 },
+    },
+  } : {
+    hidden: { opacity: 0, scale: 0.92, y: 30 },
+    visible: { 
+      opacity: 1, 
+      scale: 1, 
       y: 0,
       transition: {
         type: 'spring',
         stiffness: 350,
         damping: 30,
-        staggerChildren: 0.1,
       },
     },
     exit: {
       opacity: 0,
-      scale: 0.9,
-      y: 30,
+      scale: 0.92,
+      y: 20,
       transition: { duration: 0.2 },
     },
   };
 
-  const childVariants = {
+  const textVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 0.2 + i * 0.1,
+        duration: 0.4,
+        ease: [0.25, 0.4, 0.25, 1],
+      },
+    }),
+  };
+
+  const specialistVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: {
+        delay: 0.35,
+        type: 'spring',
+        stiffness: 400,
+        damping: 25,
+      },
+    },
+  };
+
+  const nowVariants: Variants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: 0.5,
+        duration: 0.3,
+        ease: 'easeOut',
+      },
+    },
+  };
+
+  // Floating particles for the top banner
+  const FloatingParticles = () => {
+    if (prefersReducedMotion) return null;
+    
+    const particles = Array.from({ length: 14 }, (_, i) => ({
+      id: i,
+      size: 2 + Math.random() * 4,
+      x: 5 + Math.random() * 90,
+      y: 10 + Math.random() * 80,
+      duration: 6 + Math.random() * 8,
+      delay: Math.random() * 4,
+    }));
+
+    return (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {particles.map((p) => (
+          <motion.div
+            key={p.id}
+            className="absolute rounded-full bg-white"
+            style={{
+              width: p.size,
+              height: p.size,
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              opacity: 0.3,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              x: [0, 15, -10, 0],
+              opacity: [0.2, 0.5, 0.2],
+            }}
+            transition={{
+              duration: p.duration,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: p.delay,
+            }}
+          />
+        ))}
+      </div>
+    );
   };
 
   return (
     <>
       {/* Main Modal */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isOpen && (
           <motion.div
-            variants={overlayVariants}
+            variants={backdropVariants}
             initial="hidden"
             animate="visible"
             exit="hidden"
@@ -157,236 +260,238 @@ export default function ProviderPopup({ provider }: ProviderPopupProps) {
             aria-modal="true"
             aria-labelledby="popup-title"
           >
-            {/* Backdrop with noise texture */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-            <div 
-              className="absolute inset-0 opacity-[0.03]"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-              }}
+            {/* Backdrop with blur */}
+            <motion.div 
+              className="absolute inset-0 bg-black/70"
+              initial={{ backdropFilter: 'blur(0px)' }}
+              animate={{ backdropFilter: 'blur(12px)' }}
+              exit={{ backdropFilter: 'blur(0px)' }}
+              transition={{ duration: 0.4 }}
             />
             
             <motion.div
               ref={modalRef}
-              variants={popupVariants}
+              variants={modalVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
               onClick={(e) => e.stopPropagation()}
               tabIndex={-1}
-              className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden outline-none"
+              className="relative w-[92vw] max-w-[520px] rounded-[32px] overflow-hidden outline-none"
               style={{
-                boxShadow: `0 0 80px ${provider.color}50, 0 0 160px ${provider.color}25, 0 25px 50px -12px rgba(0, 0, 0, 0.4)`,
+                minHeight: '70vh',
+                maxHeight: '85vh',
+                boxShadow: `0 0 100px ${theme.color}50, 0 25px 80px -20px rgba(0, 0, 0, 0.6)`,
               }}
             >
-              {/* Animated glow border */}
-              <motion.div
-                className="absolute inset-0 rounded-3xl opacity-50"
-                animate={{
-                  boxShadow: [
-                    `inset 0 0 20px ${provider.color}30`,
-                    `inset 0 0 40px ${provider.color}50`,
-                    `inset 0 0 20px ${provider.color}30`,
-                  ],
-                }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              />
-
-              {/* Background gradient */}
-              <div
-                className="absolute inset-0 opacity-10"
-                style={{
-                  background: `radial-gradient(circle at 50% 0%, ${provider.color}, transparent 60%)`,
-                }}
-              />
-
-              {/* Close button */}
-              <motion.button
-                variants={childVariants}
-                whileHover={{ scale: 1.1, rotate: 90 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleClose}
-                className="absolute top-4 right-4 z-10 p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                aria-label="Close popup"
-              >
-                <X className="w-5 h-5" />
-              </motion.button>
-
-              {/* Header */}
-              <motion.div
-                variants={childVariants}
-                className="relative p-6 pb-4 text-center"
-                style={{
-                  background: `linear-gradient(135deg, ${provider.color}12, transparent)`,
+              {/* ===== TOP BANNER (Provider Color) ===== */}
+              <div 
+                className="relative flex flex-col items-center justify-center"
+                style={{ 
+                  backgroundColor: theme.color,
+                  height: '38%',
+                  minHeight: '180px',
                 }}
               >
-                {/* Pulsing phone icon with glow ring */}
-                <motion.div
-                  animate={prefersReducedMotion ? {} : {
-                    scale: [1, 1.05, 1],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                  }}
-                  className="relative inline-flex items-center justify-center w-20 h-20 rounded-full mb-4"
+                {/* Vignette overlay */}
+                <div 
+                  className="absolute inset-0 pointer-events-none"
                   style={{
-                    background: `linear-gradient(135deg, ${provider.color}, ${provider.colorDark})`,
+                    background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.25) 100%)',
                   }}
-                >
-                  {/* Animated ring */}
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    animate={prefersReducedMotion ? {} : {
-                      boxShadow: [
-                        `0 0 0 0 ${provider.color}60`,
-                        `0 0 0 15px ${provider.color}00`,
-                      ],
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: 'easeOut',
-                    }}
-                  />
-                  <Phone className="w-10 h-10 text-white" />
-                </motion.div>
-
-                <motion.h2
-                  variants={childVariants}
-                  id="popup-title"
-                  className="text-2xl font-display font-bold text-slate-900 dark:text-white"
-                >
-                  Connect with Your {provider.name} Specialist!
-                </motion.h2>
-              </motion.div>
-
-              {/* Body */}
-              <div className="relative p-6 pt-2">
-                <motion.p 
-                  variants={childVariants}
-                  className="text-slate-600 dark:text-slate-300 text-center mb-6"
-                >
-                  Get expert assistance with your {provider.name} internet and TV options. Our specialists are standing by to help you compare plans and check availability at your address.
-                </motion.p>
-
-                {/* Primary CTA - Call Now */}
-                <motion.a
-                  variants={childVariants}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  href={`tel:${siteConfig.contact.phoneRaw}`}
-                  className="relative flex items-center justify-center gap-3 w-full py-4 px-6 rounded-xl font-bold text-lg text-white transition-all overflow-hidden group"
+                />
+                
+                {/* Floating particles */}
+                <FloatingParticles />
+                
+                {/* Provider Name (large, lowercase) */}
+                <motion.h1
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.15, duration: 0.5, ease: 'easeOut' }}
+                  className="relative z-10 text-white font-bold tracking-tight"
                   style={{
-                    background: `linear-gradient(135deg, ${provider.color}, ${provider.colorDark})`,
+                    fontSize: 'clamp(3rem, 12vw, 5rem)',
+                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    textTransform: 'lowercase',
+                    letterSpacing: '-0.02em',
                   }}
                 >
-                  {/* Animated shine effect */}
-                  <motion.div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{
-                      background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)`,
-                    }}
-                    animate={{ x: ['-100%', '200%'] }}
-                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
-                  />
-                  
-                  {/* Glow effect */}
-                  <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{
-                      boxShadow: `0 8px 30px ${provider.color}60`,
-                    }}
-                  />
-                  
-                  <Phone className="w-6 h-6 relative z-10" />
-                  <span className="relative z-10">Call Now: {siteConfig.contact.phone}</span>
-                </motion.a>
+                  {theme.name}
+                </motion.h1>
+              </div>
 
-                {/* Hours and email */}
-                <motion.div 
-                  variants={childVariants}
-                  className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm text-slate-500 dark:text-slate-400"
-                >
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    <span>{siteConfig.contact.hours}</span>
+              {/* ===== BOTTOM CONTENT AREA (Dark) ===== */}
+              <div 
+                className="relative flex flex-col items-center justify-center px-6 py-8 text-center"
+                style={{ 
+                  backgroundColor: '#0a0a0f',
+                  height: '62%',
+                  minHeight: '300px',
+                }}
+              >
+                {/* Smoky glow effect */}
+                <div 
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `radial-gradient(ellipse at 50% 0%, ${theme.color}20, transparent 60%)`,
+                  }}
+                />
+
+                {/* Subtle noise texture */}
+                <div 
+                  className="absolute inset-0 opacity-[0.03] pointer-events-none"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                  }}
+                />
+
+                <div className="relative z-10 flex flex-col items-center">
+                  {/* Headline Stack */}
+                  <div className="mb-5">
+                    <motion.p
+                      custom={0}
+                      variants={textVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="text-white/90 text-xl sm:text-2xl font-medium"
+                    >
+                      Connect with Your
+                    </motion.p>
+                    <motion.p
+                      id="popup-title"
+                      variants={specialistVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="text-3xl sm:text-4xl font-bold capitalize"
+                      style={{ color: theme.color }}
+                    >
+                      {provider.name} Specialist
+                    </motion.p>
+                    <motion.p
+                      variants={nowVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="text-white text-2xl sm:text-3xl font-bold"
+                    >
+                      Now!
+                    </motion.p>
                   </div>
-                  <span className="hidden sm:inline text-slate-300 dark:text-slate-600">|</span>
-                  <a
-                    href={`mailto:${siteConfig.contact.email}`}
-                    className="flex items-center gap-2 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
-                  >
-                    <Mail className="w-4 h-4" />
-                    <span>{siteConfig.contact.email}</span>
-                  </a>
-                </motion.div>
 
-                {/* Compliance disclaimer */}
-                <motion.p 
-                  variants={childVariants}
-                  className="mt-4 text-xs text-slate-400 dark:text-slate-500 text-center"
-                >
-                  {siteConfig.name} is an independent comparison service (not {provider.name}).
-                </motion.p>
-
-                {/* Don't show again */}
-                <motion.div variants={childVariants} className="mt-4 text-center">
-                  <button
-                    onClick={handleDontShowAgain}
-                    className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 underline underline-offset-2 transition-colors"
+                  {/* Description */}
+                  <motion.p
+                    custom={2}
+                    variants={textVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="text-white/70 text-sm sm:text-base max-w-xs mb-6 leading-relaxed"
                   >
-                    Don&apos;t show again this session
-                  </button>
-                </motion.div>
+                    Get expert assistance with your {provider.name} internet service. Our specialists are standing by to help you.
+                  </motion.p>
+
+                  {/* CTA Button */}
+                  <motion.a
+                    custom={3}
+                    variants={textVariants}
+                    initial="hidden"
+                    animate="visible"
+                    whileHover={prefersReducedMotion ? {} : { scale: 1.03, y: -2 }}
+                    whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
+                    href="tel:+18885240250"
+                    className="relative flex items-center justify-center gap-3 px-8 py-4 rounded-full font-bold text-white text-lg sm:text-xl overflow-hidden group"
+                    style={{
+                      background: `linear-gradient(135deg, ${theme.color}, ${theme.colorDark})`,
+                      minWidth: '280px',
+                    }}
+                  >
+                    {/* Animated glow ring */}
+                    {!prefersReducedMotion && (
+                      <motion.div
+                        className="absolute inset-0 rounded-full"
+                        animate={{
+                          boxShadow: [
+                            `0 0 20px ${theme.color}40, 0 0 40px ${theme.color}20`,
+                            `0 0 30px ${theme.color}60, 0 0 60px ${theme.color}30`,
+                            `0 0 20px ${theme.color}40, 0 0 40px ${theme.color}20`,
+                          ],
+                        }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                      />
+                    )}
+                    
+                    {/* Shimmer sweep */}
+                    {!prefersReducedMotion && (
+                      <motion.div
+                        className="absolute inset-0 opacity-30"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                          transform: 'skewX(-20deg)',
+                        }}
+                        animate={{ x: ['-200%', '200%'] }}
+                        transition={{ duration: 4, repeat: Infinity, repeatDelay: 2, ease: 'easeInOut' }}
+                      />
+                    )}
+
+                    {/* Ripple on press */}
+                    <span className="absolute inset-0 overflow-hidden rounded-full">
+                      <span 
+                        className="absolute inset-0 rounded-full opacity-0 group-active:opacity-30 transition-opacity"
+                        style={{ background: 'radial-gradient(circle, white 10%, transparent 70%)' }}
+                      />
+                    </span>
+
+                    <Phone className="w-6 h-6 relative z-10" />
+                    <span className="relative z-10">(888) 524-0250</span>
+                  </motion.a>
+
+                  {/* Footer Line */}
+                  <motion.p
+                    custom={4}
+                    variants={textVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="mt-6 text-xs sm:text-sm text-white/40"
+                  >
+                    Mon–Fri 9AM–6PM EST • support@Internetone.live
+                  </motion.p>
+                </div>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Minimized "Need Help?" Widget */}
+      {/* Minimized Widget */}
       <AnimatePresence>
         {showMinimized && !isOpen && (
           <motion.button
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={dontShowSession ? undefined : handleMinimizedClick}
-            className="fixed bottom-24 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-full shadow-lg text-white font-medium"
+            whileHover={prefersReducedMotion ? {} : { scale: 1.05 }}
+            whileTap={prefersReducedMotion ? {} : { scale: 0.95 }}
+            onClick={handleMinimizedClick}
+            className="fixed bottom-24 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-full shadow-lg text-white font-medium cursor-pointer"
             style={{
-              background: `linear-gradient(135deg, ${provider.color}, ${provider.colorDark})`,
-              boxShadow: `0 4px 20px ${provider.color}40`,
-              cursor: dontShowSession ? 'default' : 'pointer',
+              background: `linear-gradient(135deg, ${theme.color}, ${theme.colorDark})`,
+              boxShadow: `0 4px 20px ${theme.color}40`,
             }}
-            aria-label={dontShowSession ? 'Call for help' : 'Open help popup'}
           >
-            {dontShowSession ? (
-              <a href={`tel:${siteConfig.contact.phoneRaw}`} className="flex items-center gap-2">
-                <Phone className="w-5 h-5" />
-                <span className="hidden sm:inline">Need Help? Call Us</span>
-              </a>
-            ) : (
-              <>
-                <MessageCircle className="w-5 h-5" />
-                <span className="hidden sm:inline">Need Help?</span>
-              </>
-            )}
+            <MessageCircle className="w-5 h-5" />
+            <span className="hidden sm:inline">Need Help?</span>
             
-            {/* Pulse animation */}
-            <motion.span
-              className="absolute inset-0 rounded-full"
-              animate={{
-                boxShadow: [
-                  `0 0 0 0 ${provider.color}40`,
-                  `0 0 0 8px ${provider.color}00`,
-                ],
-              }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
+            {!prefersReducedMotion && (
+              <motion.span
+                className="absolute inset-0 rounded-full"
+                animate={{
+                  boxShadow: [
+                    `0 0 0 0 ${theme.color}40`,
+                    `0 0 0 10px ${theme.color}00`,
+                  ],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            )}
           </motion.button>
         )}
       </AnimatePresence>

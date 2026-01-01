@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background rounded square -->
+  <rect width="512" height="512" rx="108" fill="url(#bgGrad)"/>
+  
+  <!-- Bold "1" numeral - clean and readable -->
+  <path d="M228 128 L284 128 L284 328 L228 328 Z" fill="white"/>
+  <path d="M180 176 L228 128 L228 176 Z" fill="white"/>
+  <path d="M172 328 L340 328 L340 384 L172 384 Z" fill="white"/>
+  
+  <!-- Three wifi signal bars above -->
+  <rect x="196" y="72" width="24" height="24" rx="4" fill="white" opacity="0.5"/>
+  <rect x="244" y="56" width="24" height="40" rx="4" fill="white" opacity="0.7"/>
+  <rect x="292" y="72" width="24" height="24" rx="4" fill="white" opacity="0.5"/>
+  
+  <!-- Three connection dots below -->
+  <circle cx="208" cy="432" r="20" fill="white" opacity="0.7"/>
+  <circle cx="256" cy="448" r="16" fill="white" opacity="0.5"/>
+  <circle cx="304" cy="432" r="20" fill="white" opacity="0.7"/>
+</svg>

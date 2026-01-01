@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="180" height="180" fill="url(#bgGrad)"/>
+  
+  <!-- Bold "1" numeral -->
+  <path d="M80 42 L100 42 L100 118 L80 118 Z" fill="white"/>
+  <path d="M63 58 L80 42 L80 58 Z" fill="white"/>
+  <path d="M60 118 L120 118 L120 138 L60 138 Z" fill="white"/>
+  
+  <!-- Signal bars above -->
+  <rect x="69" y="22" width="9" height="9" rx="2" fill="white" opacity="0.5"/>
+  <rect x="86" y="16" width="9" height="15" rx="2" fill="white" opacity="0.7"/>
+  <rect x="103" y="22" width="9" height="9" rx="2" fill="white" opacity="0.5"/>
+  
+  <!-- Connection dots below -->
+  <circle cx="73" cy="154" r="7" fill="white" opacity="0.7"/>
+  <circle cx="90" cy="160" r="5" fill="white" opacity="0.5"/>
+  <circle cx="107" cy="154" r="7" fill="white" opacity="0.7"/>
+</svg>

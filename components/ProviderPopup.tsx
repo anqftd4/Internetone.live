@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, X, Mail, Clock } from 'lucide-react';
+import { Phone, Mail, Clock } from 'lucide-react';
 import { siteConfig, Provider } from '@/lib/siteConfig';
 
 interface ProviderPopupProps {
@@ -11,36 +11,20 @@ interface ProviderPopupProps {
 
 export default function ProviderPopup({ provider }: ProviderPopupProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const [dontShowAgain, setDontShowAgain] = useState(false);
 
-  // Check sessionStorage on mount
+  // Reappear after 5 seconds if closed
   useEffect(() => {
-    const dismissed = sessionStorage.getItem(`popup-dismissed-${provider.id}`);
-    if (dismissed === 'true') {
-      setIsOpen(false);
-      setDontShowAgain(true);
-    }
-  }, [provider.id]);
-
-  // Reappear after 5 seconds if not dismissed permanently
-  useEffect(() => {
-    if (!isOpen && !dontShowAgain) {
+    if (!isOpen) {
       const timer = setTimeout(() => {
         setIsOpen(true);
       }, 5000);
       return () => clearTimeout(timer);
     }
-  }, [isOpen, dontShowAgain]);
+  }, [isOpen]);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
   }, []);
-
-  const handleDontShowAgain = useCallback(() => {
-    setDontShowAgain(true);
-    setIsOpen(false);
-    sessionStorage.setItem(`popup-dismissed-${provider.id}`, 'true');
-  }, [provider.id]);
 
   const overlayVariants = {
     hidden: { opacity: 0 },
@@ -113,17 +97,6 @@ export default function ProviderPopup({ provider }: ProviderPopupProps) {
                 background: `linear-gradient(135deg, ${provider.color}15, transparent)`,
               }}
             >
-              {/* Close button */}
-              <motion.button
-                whileHover={{ scale: 1.1, rotate: 90 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleClose}
-                className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                aria-label="Close popup"
-              >
-                <X className="w-5 h-5" />
-              </motion.button>
-
               {/* Pulsing phone icon */}
               <motion.div
                 animate={{
@@ -191,22 +164,12 @@ export default function ProviderPopup({ provider }: ProviderPopupProps) {
                 </a>
               </div>
 
-              {/* Don't show again option */}
-              <div className="mt-6 flex items-center justify-center">
-                <button
-                  onClick={handleDontShowAgain}
-                  className="text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 underline underline-offset-2 transition-colors"
-                >
-                  Don't show again (this session)
-                </button>
-              </div>
-
-              {/* Secondary close button */}
+              {/* Close button */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleClose}
-                className="w-full mt-4 py-3 px-6 rounded-xl font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                className="w-full mt-6 py-3 px-6 rounded-xl font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
               >
                 Close
               </motion.button>

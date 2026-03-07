@@ -61,6 +61,7 @@ export const siteConfig = {
   navigation: [
     { name: 'Home', href: '/' },
     { name: 'Compare', href: '/compare' },
+    { name: 'Connect Me', href: '/connect-me' },
     { name: 'Deals', href: '/deals' },
     { name: 'TV', href: '/tv' },
     { name: 'Bundles', href: '/bundles' },
@@ -73,6 +74,7 @@ export const siteConfig = {
     company: [
       { name: 'About', href: '/about' },
       { name: 'Why Us', href: '/why-us' },
+      { name: 'Connect Me', href: '/connect-me' },
       { name: 'Contact', href: '/contact' },
     ],
     resources: [

@@ -220,68 +220,55 @@ export default function ConnectMePage() {
   return (
     <PageWrapper>
       {/* Form Section - TOP OF PAGE */}
-      <section className="relative min-h-screen flex items-center py-8 overflow-hidden">
+      <section className="relative min-h-screen pt-28 pb-16 overflow-hidden">
         {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-purple-950">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-brand-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
           <motion.div
-            className="absolute top-10 right-10 w-72 h-72 rounded-full bg-brand-400/20 blur-3xl"
-            animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
-            transition={{ duration: 8, repeat: Infinity }}
-          />
-          <motion.div
-            className="absolute bottom-10 left-10 w-96 h-96 rounded-full bg-purple-400/20 blur-3xl"
-            animate={{ scale: [1.2, 1, 1.2], opacity: [0.2, 0.4, 0.2] }}
+            className="absolute top-40 right-10 w-72 h-72 rounded-full bg-brand-400/10 blur-3xl"
+            animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.3, 0.2] }}
             transition={{ duration: 10, repeat: Infinity }}
           />
           <motion.div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-cyan-400/10 blur-3xl"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
+            className="absolute bottom-20 left-10 w-80 h-80 rounded-full bg-purple-400/10 blur-3xl"
+            animate={{ scale: [1.1, 1, 1.1], opacity: [0.15, 0.25, 0.15] }}
+            transition={{ duration: 12, repeat: Infinity }}
           />
         </div>
 
         <div className="container relative z-10">
-          <div className="max-w-2xl mx-auto">
-            {/* Form Header */}
+          <div className="max-w-xl mx-auto">
+            {/* Form Header - Clean and Refined */}
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-8"
+              transition={{ duration: 0.5 }}
+              className="text-center mb-6"
             >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 font-medium text-sm mb-4"
-              >
-                <Sparkles className="w-4 h-4" />
-                Find Your Perfect Plan in 60 Seconds
-              </motion.div>
-              
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-2">
+              <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground mb-2">
                 Let&apos;s Get You Connected
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Answer a few quick questions to find the best internet options
               </p>
             </motion.div>
 
-            {/* Progress Bar */}
+            {/* Progress Bar - Compact */}
             <motion.div
-              initial={{ opacity: 0, scaleX: 0 }}
-              animate={{ opacity: 1, scaleX: 1 }}
-              className="mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="mb-4"
             >
-              <div className="flex justify-between text-xs text-muted-foreground mb-2">
-                <span>Step {step} of {totalSteps}</span>
-                <span>{Math.round(progress)}% Complete</span>
+              <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+                <span className="font-medium">Step {step} of {totalSteps}</span>
+                <span>{Math.round(progress)}%</span>
               </div>
-              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                 <motion.div
-                  className="h-full bg-gradient-to-r from-brand-500 to-purple-500 rounded-full"
+                  className="h-full bg-gradient-to-r from-brand-500 to-brand-600 rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
                 />
               </div>
             </motion.div>
@@ -291,10 +278,11 @@ export default function ConnectMePage() {
               {!isSubmitted ? (
                 <motion.div
                   key="form"
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl shadow-brand-500/10 p-6 md:p-8 border border-slate-200 dark:border-slate-700"
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none p-5 md:p-6 border border-slate-200/80 dark:border-slate-700"
                 >
                   <AnimatePresence mode="wait" custom={direction}>
                     {/* Step 1: Has Provider */}
@@ -308,66 +296,39 @@ export default function ConnectMePage() {
                         exit="exit"
                         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                       >
-                        <motion.h2
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="text-xl md:text-2xl font-bold text-center mb-8"
-                        >
+                        <h2 className="text-lg md:text-xl font-bold text-center mb-6">
                           Do you currently have an internet service provider?
-                        </motion.h2>
+                        </h2>
 
-                        <motion.div
-                          variants={containerVariants}
-                          initial="hidden"
-                          animate="visible"
-                          className="grid grid-cols-2 gap-4 mb-8"
-                        >
+                        <div className="grid grid-cols-2 gap-3 mb-6">
                           <motion.button
-                            variants={itemVariants}
-                            whileHover={{ scale: 1.03, y: -2 }}
-                            whileTap={{ scale: 0.97 }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={() => handleProviderChoice(true)}
-                            className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl font-semibold text-lg transition-all overflow-hidden ${
+                            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl font-semibold transition-all ${
                               formData.hasProvider === true
-                                ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/30'
+                                ? 'bg-green-500 text-white shadow-md'
                                 : 'bg-slate-100 dark:bg-slate-700 text-foreground hover:bg-green-50 dark:hover:bg-green-900/20'
                             }`}
                           >
-                            {formData.hasProvider === true && (
-                              <motion.div
-                                className="absolute inset-0 bg-white/20"
-                                initial={{ scale: 0, opacity: 0 }}
-                                animate={{ scale: 2, opacity: 0 }}
-                                transition={{ duration: 0.5 }}
-                              />
-                            )}
-                            <CheckCircle className={`w-10 h-10 ${formData.hasProvider === true ? 'text-white' : 'text-green-500'}`} />
+                            <CheckCircle className={`w-8 h-8 ${formData.hasProvider === true ? 'text-white' : 'text-green-500'}`} />
                             <span>YES</span>
                           </motion.button>
 
                           <motion.button
-                            variants={itemVariants}
-                            whileHover={{ scale: 1.03, y: -2 }}
-                            whileTap={{ scale: 0.97 }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                             onClick={() => handleProviderChoice(false)}
-                            className={`relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl font-semibold text-lg transition-all overflow-hidden ${
+                            className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl font-semibold transition-all ${
                               formData.hasProvider === false
-                                ? 'bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/30'
+                                ? 'bg-red-500 text-white shadow-md'
                                 : 'bg-slate-100 dark:bg-slate-700 text-foreground hover:bg-red-50 dark:hover:bg-red-900/20'
                             }`}
                           >
-                            {formData.hasProvider === false && (
-                              <motion.div
-                                className="absolute inset-0 bg-white/20"
-                                initial={{ scale: 0, opacity: 0 }}
-                                animate={{ scale: 2, opacity: 0 }}
-                                transition={{ duration: 0.5 }}
-                              />
-                            )}
-                            <XCircle className={`w-10 h-10 ${formData.hasProvider === false ? 'text-white' : 'text-red-500'}`} />
+                            <XCircle className={`w-8 h-8 ${formData.hasProvider === false ? 'text-white' : 'text-red-500'}`} />
                             <span>NO</span>
                           </motion.button>
-                        </motion.div>
+                        </div>
 
                         {/* Conditional fields based on YES */}
                         <AnimatePresence>
@@ -376,7 +337,7 @@ export default function ConnectMePage() {
                               initial={{ opacity: 0, height: 0 }}
                               animate={{ opacity: 1, height: 'auto' }}
                               exit={{ opacity: 0, height: 0 }}
-                              className="space-y-4 mb-6"
+                              className="space-y-4 mb-4"
                             >
                               <div>
                                 <label className="block text-sm font-medium mb-2">
@@ -386,10 +347,10 @@ export default function ConnectMePage() {
                                   {providerOptions.map((provider, idx) => (
                                     <motion.button
                                       key={provider.value}
-                                      initial={{ opacity: 0, scale: 0.8 }}
+                                      initial={{ opacity: 0, scale: 0.9 }}
                                       animate={{ opacity: 1, scale: 1 }}
-                                      transition={{ delay: idx * 0.05 }}
-                                      whileHover={{ scale: 1.05 }}
+                                      transition={{ delay: idx * 0.03 }}
+                                      whileHover={{ scale: 1.03 }}
                                       whileTap={{ scale: 0.95 }}
                                       onClick={() => setFormData({ ...formData, currentProvider: provider.value })}
                                       className={`px-3 py-2 rounded-xl text-sm font-medium transition-all ${
@@ -757,22 +718,22 @@ export default function ConnectMePage() {
                   {step < 5 && (
                     <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
                       <motion.button
-                        whileHover={{ x: -3 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ x: -2 }}
+                        whileTap={{ scale: 0.97 }}
                         onClick={prevStep}
                         disabled={step === 1}
-                        className="flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                        className="flex items-center gap-1.5 px-3 py-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                       >
                         <ArrowLeft className="w-4 h-4" />
                         Back
                       </motion.button>
 
                       <motion.button
-                        whileHover={{ scale: 1.05, x: 3 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={nextStep}
                         disabled={!canProceed()}
-                        className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-brand-500/20"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-500 hover:bg-brand-600 text-white font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
                         Continue
                         <ArrowRight className="w-4 h-4" />
@@ -784,59 +745,42 @@ export default function ConnectMePage() {
                 /* Success State */
                 <motion.div
                   key="success"
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8 md:p-12 text-center"
+                  className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 md:p-8 text-center"
                 >
                   <motion.div
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: 'spring', delay: 0.2 }}
-                    className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-500/30"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', delay: 0.1 }}
+                    className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500 flex items-center justify-center"
                   >
-                    <CheckCircle className="w-12 h-12 text-white" />
+                    <CheckCircle className="w-8 h-8 text-white" />
                   </motion.div>
 
-                  <motion.h2
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-2xl md:text-3xl font-bold mb-4"
-                  >
-                    You&apos;re All Set, {formData.name.split(' ')[0]}!
-                  </motion.h2>
+                  <h2 className="text-xl md:text-2xl font-bold mb-2">
+                    You&apos;re All Set{formData.name ? `, ${formData.name.split(' ')[0]}` : ''}!
+                  </h2>
                   
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="text-muted-foreground mb-8"
-                  >
+                  <p className="text-muted-foreground text-sm mb-6">
                     A specialist will contact you {formData.bestTimeToCall === 'anytime' ? 'soon' : `during the ${formData.bestTimeToCall}`} to discuss the best options at {formData.zip}.
-                  </motion.p>
+                  </p>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="bg-gradient-to-br from-brand-50 to-purple-50 dark:from-brand-900/20 dark:to-purple-900/20 rounded-2xl p-6 mb-8"
-                  >
-                    <p className="text-sm text-muted-foreground mb-3">
+                  <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 mb-6">
+                    <p className="text-xs text-muted-foreground mb-2">
                       Want faster assistance? Call us now:
                     </p>
-                    <motion.a
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                    <a
                       href={`tel:${siteConfig.contact.phoneRaw}`}
-                      className="inline-flex items-center gap-3 text-2xl font-bold text-brand-500"
+                      className="inline-flex items-center gap-2 text-xl font-bold text-brand-500"
                     >
-                      <Phone className="w-7 h-7" />
+                      <Phone className="w-5 h-5" />
                       {siteConfig.contact.phone}
-                    </motion.a>
-                    <p className="text-sm text-muted-foreground mt-2">
+                    </a>
+                    <p className="text-xs text-muted-foreground mt-1">
                       {siteConfig.contact.hours}
                     </p>
-                  </motion.div>
+                  </div>
 
                   <button
                     onClick={() => {
@@ -856,7 +800,7 @@ export default function ConnectMePage() {
                         bestTimeToCall: '',
                       });
                     }}
-                    className="text-brand-500 hover:text-brand-600 font-medium"
+                    className="text-brand-500 hover:text-brand-600 font-medium text-sm"
                   >
                     Submit another request
                   </button>
@@ -868,52 +812,49 @@ export default function ConnectMePage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="mt-6 text-center"
+              transition={{ delay: 0.3 }}
+              className="mt-4 text-center"
             >
-              <p className="text-sm text-muted-foreground mb-2">
-                Prefer to talk now?
+              <p className="text-xs text-muted-foreground">
+                Prefer to talk now?{' '}
+                <a
+                  href={`tel:${siteConfig.contact.phoneRaw}`}
+                  className="text-brand-500 font-medium hover:text-brand-600"
+                >
+                  Call {siteConfig.contact.phone}
+                </a>
               </p>
-              <motion.a
-                whileHover={{ scale: 1.02 }}
-                href={`tel:${siteConfig.contact.phoneRaw}`}
-                className="inline-flex items-center gap-2 text-brand-500 font-semibold hover:text-brand-600"
-              >
-                <Phone className="w-4 h-4" />
-                Call {siteConfig.contact.phone}
-              </motion.a>
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* Features Section - BELOW FORM */}
-      <section className="py-20 bg-white dark:bg-slate-900">
+      <section className="py-16 bg-white dark:bg-slate-900">
         <div className="container">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12"
+            className="text-center mb-10"
           >
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
+            <h2 className="text-2xl md:text-3xl font-display font-bold mb-3">
               Why Choose {siteConfig.name}?
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-muted-foreground max-w-2xl mx-auto">
               We make finding the right internet service simple and stress-free
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-                className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 text-center"
+                className="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 text-center"
               >
                 <div className="w-14 h-14 mx-auto rounded-xl bg-gradient-to-br from-brand-500/20 to-purple-500/20 flex items-center justify-center mb-4">
                   <feature.icon className="w-7 h-7 text-brand-500" />
